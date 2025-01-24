@@ -1,0 +1,48 @@
+package org.example;
+
+import java.util.Scanner;
+
+/**
+ * The main driver class. We utilize the functions in the rb tree to create an unsorted list
+ * of integers that will then be sorted into a proper Red-Black tree.
+ */
+public class Main {
+    public static void main(String[] args) {
+
+        RedBlackTree<Integer> rbTree = new RedBlackTree<>(); //We will be using integers for the RBTree
+
+        //***Insert unsorted Integers***//
+        rbTree.insert(20);
+        rbTree.insert(33);
+        rbTree.insert(100);
+        rbTree.insert(2);
+        rbTree.insert(97);
+        rbTree.insert(356);
+        rbTree.insert(54);
+        rbTree.insert(47);
+        rbTree.insert(39);
+        rbTree.insert(207);
+
+        //***Print sorted Tree***//
+        System.out.println("RBTree after insertion: "+rbTree.toString()); //Output: 2 20 3 39...
+
+        //***Delete a few nodes***//
+        rbTree.delete(47);
+        rbTree.delete(54);
+        System.out.println("RBTree after deletion: "+rbTree.toString()); //Output excludes 47 and 54 from original
+
+        //***Find a specific node***//
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter a value, and I will find it in the RBTree.");
+        int value = sc.nextInt();
+        if(rbTree.find(value)){ //will return true or false depending on if it is found
+            System.out.println("Value found: "+value+" is in the RBTree.");
+        } else {
+            System.out.println("Value "+value+" is not in the RBTree.");
+        }
+
+
+
+
+    }
+}
