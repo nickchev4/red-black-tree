@@ -1,0 +1,360 @@
+package org.example;
+
+/**
+ * Red-Black tree that satisfies all properties, checks for violations, and makes
+ * rotations accordingly. A Red-Black tree is a BST.
+ * - A node must be either RED or BLACK enum
+ * - All root and nil (TNIL) leaf nodes are BLACK
+ * - If a node is RED, its children are BLACK
+ * - All paths from a node to its nil descendants contain the same number of BLACK nodes
+ *
+ * Utilizes a Depth First Search for the BST
+ *
+ * @param <T> generic object that can accept any variable to store in the tree.
+ *           in this case, we use a seperate BSTNode class
+ */
+public class RedBlackTree <T extends Comparable<T>>{
+
+    private BSTNode<T> root;
+    private final BSTNode<T> TNIL;
+
+    /*
+        Constructor to initialize a new RedBlackTree
+     */
+    public RedBlackTree() {
+        TNIL = new BSTNode<>(null); //nil node with initialized null data
+        TNIL.color = BSTNode.NodeColor.BLACK;
+        TNIL.left = TNIL;
+        TNIL.right = TNIL;
+        TNIL.parent = TNIL;
+        root = TNIL; //initialize the root as TNIL
+    }
+
+    /** toString
+     * Returns the list in sorted order as a string.
+     * @return the sorted red/black tree
+     */
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        inOrderTraversalHelper(root, sb);
+        return sb.toString().trim();
+    }
+
+    /** inOrderTraversalHelper
+     * Helper method that performs an in order traversal.
+     * appends each node in sorted order.
+     * @param node each traversed node
+     * @param sb the string builder class to convert it to string
+     */
+    protected void inOrderTraversalHelper(BSTNode<T> node, StringBuilder sb){
+        if(node != TNIL){
+            inOrderTraversalHelper(node.left, sb); //Traverse left subtree
+            sb.append(node.data).append(" "); //Visit the current node
+            inOrderTraversalHelper(node.right, sb); //Traverse right subtree
+        }
+    }
+
+
+    /** leftRotate
+     * Performs a left rotation if needed for correction
+     */
+    protected void leftRotate(BSTNode <T> x){
+        BSTNode<T> y = x.right;
+        x.right = y.left;
+        if(y.left != TNIL){
+            y.left.parent = x;
+        }
+        y.parent = x.parent;
+        if(x.parent == null){
+            this.root = y;
+        } else if(x == x.parent.left){
+            x.parent.left = y;
+        } else {
+            x.parent.right = y;
+        }
+        y.left = x;
+        x.parent = y;
+    }
+
+    /** rightRotate
+     * Function that performs a right rotation if needed in correction
+     */
+    protected void rightRotate(BSTNode<T> x){
+        BSTNode<T> y = x.left;
+        x.left = y.right;
+        if(y.right != TNIL){
+            y.right.parent = x;
+        }
+        y.parent = x.parent;
+        if(x.parent == null){
+            this.root = y;
+        }else if(x == x.parent.right){
+            x.parent.right = y;
+        }else {
+            x.parent.left = y;
+        }
+        y.right = x;
+        x.parent = y;
+    }
+
+    /** insert
+     * Inserts the given value into the tree. Passes in a generic type
+     * value to be stored in the node's data.
+     * @param key
+     */
+    protected void insert (T key){
+
+        BSTNode<T> node = new BSTNode<T>(key);
+        node.parent = null;
+        node.left = TNIL;
+        node.right = TNIL;
+        node.color = BSTNode.NodeColor.RED; //new node is red
+
+        BSTNode<T> y = null;
+        BSTNode<T> x = this.root;
+
+        //Find the correct position to insert the new node
+        while(x != TNIL){
+            y = x;
+            if(node.data.compareTo(x.data) < 0){
+                x = x.left;
+            }else {
+                x = x.right;
+            }
+        }
+
+        node.parent = y;
+        if(y == null){
+            root = node;
+        }else if(node.data.compareTo(y.data) < 0){
+            y.left = node;
+        }else {
+            y.right = node;
+        }
+        //Fix tree if RBTree properties are violated
+        if(node.parent == null){ //all nil nodes are black
+            node.color = BSTNode.NodeColor.BLACK;
+            return;
+        }
+        if(node.parent.parent == null){
+            return;
+        }
+        insertFixup(node);
+    }
+
+    /** insertFixup
+     * Helper function for insert. Fixes any violations in the tree properties after
+     * a node is inserted.
+     * @param key
+     */
+    protected void insertFixup(BSTNode<T> key){
+        BSTNode<T> u;
+        while(key.parent.color == BSTNode.NodeColor.RED) {
+            if (key.parent == key.parent.parent.right) {
+                u = key.parent.parent.left;
+                if (u.color == BSTNode.NodeColor.RED) {
+                    u.color = BSTNode.NodeColor.BLACK;
+                    key.parent.color = BSTNode.NodeColor.BLACK;
+                    key.parent.parent.color = BSTNode.NodeColor.RED;
+                    key = key.parent.parent;
+                } else {
+                    if (key == key.parent.left) {
+                        key = key.parent;
+                        rightRotate(key);
+                    }
+                    key.parent.color = BSTNode.NodeColor.BLACK;
+                    key.parent.parent.color = BSTNode.NodeColor.RED;
+                    leftRotate(key.parent.parent);
+                }
+            } else {
+                u = key.parent.parent.right;
+
+                if (u.color == BSTNode.NodeColor.RED) {
+                    u.color = BSTNode.NodeColor.BLACK;
+                    key.parent.color = BSTNode.NodeColor.BLACK;
+                    key.parent.parent.color = BSTNode.NodeColor.RED;
+                    key = key.parent.parent;
+                } else {
+                    if (key == key.parent.right) {
+                        key = key.parent;
+                        leftRotate(key);
+                    }
+                    key.parent.color = BSTNode.NodeColor.BLACK;
+                    key.parent.parent.color = BSTNode.NodeColor.RED;
+                    rightRotate(key.parent.parent);
+                }
+            }
+            if (key == root) {
+                break;
+            }
+        }
+        root.color = BSTNode.NodeColor.BLACK;
+    }
+
+    /** find
+     * Finds a specific value in the red/black tree.
+     * @param value the specific value to search for
+     * @return true if value is found, false if not
+     */
+    public boolean find (T value){
+        return finder(root,value) != TNIL;
+    }
+
+    /** finder
+     * Helper function that searches for a specific node in the tree.
+     * @param node starting node
+     * @param value specified value to search for
+     * @return the node if found, TNIL if otherwise
+     */
+    private BSTNode<T> finder(BSTNode<T> node, T value){
+        //Cases that locate if the node is a left or right child
+        while (node != TNIL && value.compareTo(node.data) != 0){
+            if(value.compareTo(node.data) < 0){
+                node = node.left;
+            } else {
+                node = node.right;
+            }
+        }
+        return node; //returns the found node
+    }
+
+    /** delete
+     * Deletes a specified value from the tree. Returns true if value is in
+     * tree and is successfully deleted.
+     * @param value the specific value to delete
+     * @return true if deletion is successful, false if not
+     */
+    public boolean delete (T value){
+    BSTNode<T> node = finder(root, value);
+    if(node == TNIL){ //nil node or no node found
+        return false;
+    }
+    deleter(node); //calls the helper function
+        return true;
+    }
+
+    /** deleter
+     * Helper method for the delete function that locates the specific node to be deleted.
+     * Works essentially like the INSERTER helper function, only backwards.
+     * @param node the node to be deleted
+     */
+    protected void deleter(BSTNode<T> node) {
+        BSTNode<T> y = node; //node to be removed from the tree
+        BSTNode<T> x; //child of removed node
+        BSTNode.NodeColor ogColor = y.color;
+
+        if (node.left == TNIL) {
+            x = node.right;
+            transplant(node, node.right);
+        } else if (node.right == TNIL) {
+            x = node.left;
+            transplant(node, node.left);
+        } else {
+            y = min(node.right);
+            ogColor = y.color;
+            x = y.right;
+            if (y.parent == node) {
+                x.parent = y;
+            } else {
+                transplant(node, y);
+                y.left = node.left;
+                y.left.parent = y;
+                y.color = node.color;
+            }
+
+            if (ogColor == BSTNode.NodeColor.BLACK) {
+                deleteFixup(x);
+            }
+        }
+    }
+
+    /** deleteFixup
+     * Helper method to fix any violations after deleting a node. Traverses through each node
+     * and checks to see where the violation is.
+     * @param x the node where a violation could occur
+     */
+        private void deleteFixup(BSTNode<T> x) {
+            while (x != root && x.color == BSTNode.NodeColor.BLACK) {
+                if (x == x.parent.left) { //insure not null
+                    BSTNode<T> w = x.parent.right; //locates as a sibling
+                    if (w.color == BSTNode.NodeColor.RED) {
+                        w.color = BSTNode.NodeColor.BLACK;
+                        x.parent.color = BSTNode.NodeColor.RED;
+                        leftRotate(x.parent);
+                        w = x.parent.right;
+                    }
+                    if (w.left.color == BSTNode.NodeColor.BLACK && w.right.color == BSTNode.NodeColor.BLACK) {
+                        w.color = BSTNode.NodeColor.RED;
+                        x = x.parent;
+                    } else {
+                        if (w.right.color == BSTNode.NodeColor.BLACK) {
+                            w.left.color = BSTNode.NodeColor.BLACK;
+                            w.color = BSTNode.NodeColor.RED;
+                            rightRotate(w);
+                            w = x.parent.right;
+                        }
+                        w.color = x.parent.color;
+                        x.parent.color = BSTNode.NodeColor.BLACK;
+                        w.right.color = BSTNode.NodeColor.BLACK;
+                        leftRotate(x.parent);
+                        x = root;
+                    }
+                } else {
+                    BSTNode<T> w = x.parent.left; //locate as a sibling
+                    if (w.color == BSTNode.NodeColor.RED) {
+                        w.color = BSTNode.NodeColor.BLACK;
+                        x.parent.color = BSTNode.NodeColor.RED;
+                        rightRotate(x.parent);
+                        w = x.parent.left;
+                    }
+                    if (w.right.color == BSTNode.NodeColor.BLACK && w.left.color == BSTNode.NodeColor.BLACK) {
+                        w.color = BSTNode.NodeColor.RED;
+                        x = x.parent;
+                    } else {
+                        if (w.left.color == BSTNode.NodeColor.BLACK) {
+                            w.right.color = BSTNode.NodeColor.BLACK;
+                            w.color = BSTNode.NodeColor.RED;
+                            leftRotate(w);
+                            w = x.parent.left;
+                        }
+                        w.color = x.parent.color;
+                        x.parent.color = BSTNode.NodeColor.BLACK;
+                        w.left.color = BSTNode.NodeColor.BLACK;
+                        rightRotate(x.parent);
+                        x = root;
+                    }
+                }
+            }
+            x.color = BSTNode.NodeColor.BLACK;
+        }
+
+    /** transplant
+     * Helper method to replace one subtree with another.
+     * @param u the node to be replaced
+     * @param v the new subtree
+     */
+    private void transplant(BSTNode<T> u, BSTNode<T> v){
+            if(u.parent == null){
+                root = v;
+            } else if (u.parent == u.parent.left){
+                u.parent.left = v;
+            } else {
+                u.parent.right = v;
+            }
+            v.parent = u.parent;
+        }
+
+    /** min
+     * Finds the minimum node in a subtree
+     * @param node the minimum node
+     * @return the minimum node if it satisfies the constraints
+     */
+    private BSTNode<T> min(BSTNode<T> node){
+        while (node.left != TNIL){
+            node = node.left;
+        }
+        return node;
+        }
+    }
+
