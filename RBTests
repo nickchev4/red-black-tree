@@ -1,0 +1,61 @@
+package org.example;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class RBTreeTests {
+
+    @Test
+    public void testInsert(){
+        //Create a new instance for testing
+        RedBlackTree<Integer> rbTree = new RedBlackTree<>();
+
+        int val1 = 10;
+
+        //Insert the elements
+        rbTree.insert(val1);
+        rbTree.insert(20);
+        rbTree.insert(30);
+
+        //Verify a specific element is in the tree
+        assertTrue(rbTree.find(val1));
+    }
+
+    @Test
+    public void testDelete(){
+        //New testing instance
+        RedBlackTree<Integer> rbTree = new RedBlackTree<>();
+
+        //Add some elements
+        rbTree.insert(10);
+        rbTree.insert(20);
+        rbTree.insert(30);
+
+        //Delete an element
+        assertTrue(rbTree.delete(20));
+
+        //Verify val5 is no longer in the tree
+        assertTrue(rbTree.find(10));
+
+    }
+
+    @Test
+    public void testFind(){
+        RedBlackTree<Integer> rbTree = new RedBlackTree<>();
+
+        //Insert Elements
+        rbTree.insert(10);
+        rbTree.insert(20);
+        rbTree.insert(30);
+
+        //Verify Elements Exist
+        assertTrue(rbTree.find(10));
+        assertTrue(rbTree.find(20));
+        assertTrue(rbTree.find(30));
+
+        //Verify that a value does not exist
+        assertFalse(rbTree.find(40));
+    }
+}
