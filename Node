@@ -1,0 +1,33 @@
+package org.example;
+
+/**
+ * Node that can be inserted, deleted, and searched for in the red/black tree.
+ * Contains:
+ * - Enum for color (New nodes always default to RED)
+ * - Generic data if left child
+ * - Generic data if right child
+ * - Generic data if parent
+ */
+public class BSTNode<T extends Comparable<T>>{
+
+    protected enum NodeColor {
+        RED, BLACK
+    }
+
+    T data;
+    BSTNode<T> left;
+    BSTNode<T> right;
+    BSTNode<T> parent;
+    NodeColor color; //used a diff variable name to differentiate from java.awt color
+
+    /*
+        Constructor. New nodes are always red when inserted, left right and parent set to null.
+     */
+    BSTNode(T data){
+        this.data = data;
+        this.color = NodeColor.RED;
+        this.left = null;
+        this.right = null;
+        this.parent = null;
+    }
+}
